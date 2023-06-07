@@ -1,0 +1,57 @@
+version: "3.8"
+services:
+    # imagem microservice email
+    microservice_email:
+        build: 
+            args: 
+                user: elessandro
+                uid: 1000
+            context: ./
+            dockerfile: Dockerfile
+        image: laravel-app
+        restart: unless-stopped
+        working_dir: /var/www/
+        volumes:
+            - ./:/var/www
+        depends_on: 
+            - redis_email
+            - queue_email
+        networks: 
+            - microservices_email
+    
+    # nginx microservice email
+    nginx_email:
+        image: nginx:alpine
+        restart: unless-stopped
+        ports: 
+            - 8005:80
+        volumes: 
+            - ./:/var/www
+            - ./docker/nginx/:/etc/nginx/conf.d/
+        networks: 
+            - microservices_email
+
+    # queue microservice email
+    queue_email:
+        build: 
+            args: 
+                user: elessandro
+                uid: 1000
+            context: ./
+            dockerfile: Dockerfile
+        restart: unless-stopped
+        command: "php artisan queue:work"
+        volumes: 
+            - ./:/var/www
+        networks: 
+            - microservices_email
+
+    #redis microservice email
+    redis_email:
+        image: redis:latest
+        networks: 
+            - microservices_email
+
+networks: 
+    microservices_email:
+        driver: bridge
