@@ -1,6 +1,7 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Jobs\AutomateCreated;
+use App\Jobs\HeroCreated;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,5 +16,12 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
+    return response()->json(['message' => 'Microservice Email']);
+});
+
+Route::get('/email', function () {
+
+    HeroCreated::dispatch('hero@hero.com')->onQueue('queue_email');
+
     return response()->json(['message' => 'Microservice Email']);
 });
